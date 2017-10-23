@@ -50,12 +50,19 @@ func handleCoffeeRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Active members: %v\n", activeMembers)
 
-	chosenMember := activeMembers[rand.Intn(len(activeMembers))]
-	log.Printf("Chosen member: %v\n", chosenMember)
+	var text string
+	if len(activeMembers) == 0 {
+		text = "No one is around to make coffee :("
+		log.Println("No active members")
+	} else {
+		chosenMember := activeMembers[rand.Intn(len(activeMembers))]
+		log.Printf("Chosen member: %v\n", chosenMember)
+		text = fmt.Sprintf("You're up <@%v>!", chosenMember)
+	}
 
 	res := response{
 		ResponseType: "in_channel",
-		Text:         fmt.Sprintf("You're up <@%v>!", chosenMember),
+		Text:         text,
 	}
 
 	data, err := json.Marshal(res)
