@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/boltdb/bolt"
+  packages = ["."]
+  revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
+  version = "v1.3.1"
+
+[[projects]]
   name = "github.com/nlopes/slack"
   packages = ["."]
   revision = "c86337c0ef2486a15edd804355d9c73d2f2caed1"
@@ -13,9 +19,15 @@
   packages = ["websocket"]
   revision = "cd69bc3fc700721b709c3a59e16e24c67b58f6ff"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "316e9227019baa6ea3f76ea21538bab101fd1182"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ab5db84a20dbde2d02b378c8dcda72f862297bf2e7d5dfe01c825eb33e014b2a"
+  inputs-digest = "8cd97c73228b3d2eff355c0498a1fc70e3eb0fff308d2b8524a3cfdb35ea2ff4"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -74,7 +74,7 @@ func (h CoffeeHandler) handleCoffeeDraw(w http.ResponseWriter) {
 func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 	log.Println("Handling coffee stats")
 
-	stats := h.statsService.Get()
+	stats, _ := h.statsService.Get()
 	log.Printf("Stats: %v\n", stats)
 
 	if len(stats) == 0 {

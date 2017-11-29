@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/boltdb/bolt"
 )
 
 type memberStatus struct {
@@ -21,8 +23,17 @@ type response struct {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	statsService := NewMemoryStatsService()
-	handler := NewCoffeeHandler(statsService)
+	db, err := bolt.Open("devcoffee.db", 0600, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	service, err := NewDiskStatsService(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handler := NewCoffeeHandler(service)
 	http.Handle("/need-coffee-please", handler)
 
 	log.Fatal(http.ListenAndServe(":3000", nil))

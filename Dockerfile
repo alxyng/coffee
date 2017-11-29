@@ -2,7 +2,9 @@ FROM golang:1.9 as build
 RUN go get -u github.com/golang/dep/cmd/dep
 WORKDIR /go/src/github.com/nullseed/devcoffee/devcoffee
 COPY vendor vendor
+COPY handler.go .
 COPY main.go .
+COPY service.go .
 COPY Gopkg.lock .
 COPY Gopkg.toml .
 RUN dep ensure --vendor-only
