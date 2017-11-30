@@ -4,21 +4,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/nlopes/slack"
+	"github.com/nullseed/devcoffee/services"
 )
-
-type memberStatus struct {
-	Member string
-	Error  error
-	Active bool
-}
-
-type response struct {
-	ResponseType string `json:"response_type"`
-	Text         string `json:"text"`
-}
 
 func main() {
 	rand.Seed(time.Now().Unix())
@@ -27,13 +19,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 
-	service, err := NewDiskStatsService(db)
+	statsService, err := services.NewDiskStatsService(db)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	handler := NewCoffeeHandler(service)
+	api := slack.New(os.Getenv("SLACK_TOKEN"))
+	channel := os.Getenv("SLACK_CHANNEL")
+
+	memberService := services.NewSlackMemberService(api, channel)
+
+	handler := NewCoffeeHandler(memberService, statsService)
 	http.Handle("/need-coffee-please", handler)
 
 	log.Fatal(http.ListenAndServe(":3000", nil))

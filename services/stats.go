@@ -1,6 +1,7 @@
-package main
+package services
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/boltdb/bolt"
@@ -57,7 +58,10 @@ func (s DiskStatsService) Get() (map[string]int, error) {
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			n, _ := strconv.ParseInt(string(v), 0, 0)
+			n, err := strconv.ParseInt(string(v), 0, 0)
+			if err != nil {
+				return fmt.Errorf("could not parse int: %v", err)
+			}
 			table[string(k)] = int(n)
 		}
 
@@ -75,7 +79,10 @@ func (s DiskStatsService) Increment(member string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("members"))
 		v := b.Get([]byte(member))
-		n, _ := strconv.ParseInt(string(v), 0, 0)
+		n, err := strconv.ParseInt(string(v), 0, 0)
+		if err != nil {
+			return fmt.Errorf("could not parse int: %v", err)
+		}
 		n++
 		v = []byte(strconv.FormatInt(n, 10))
 		return b.Put([]byte(member), v)
