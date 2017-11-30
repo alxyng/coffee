@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 
 	db, err := bolt.Open("devcoffee.db", 0600, nil)
 	if err != nil {
