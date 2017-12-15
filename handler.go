@@ -79,7 +79,7 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 
 	var results []string
 	for k, v := range stats {
-		results = append(results, fmt.Sprintf("<%v>: %v", k, v))
+		results = append(results, fmt.Sprintf("<@%v>: %v", k, v))
 	}
 
 	writeResponse(w, strings.Join(results, ", "))
