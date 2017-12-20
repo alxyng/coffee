@@ -10,6 +10,5 @@ docker run -e SLACK_TOKEN -e SLACK_CHANNEL -p "3000:3000" devcoffee:latest
 
 ## Todo
 
-- Implement `/coffee ready` which increments the stats counter rather than `/coffee` incrementing it
 - Persist devcoffee.db on the host using a docker volume
 - Show member names in stats without mentioning members

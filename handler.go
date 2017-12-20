@@ -23,10 +23,16 @@ func NewCoffeeHandler(m services.MemberService, s services.StatsService) CoffeeH
 }
 
 func (h CoffeeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	member := r.FormValue("user_id")
 	arg := r.FormValue("text")
 
 	if arg == "" {
 		h.handleCoffeeDraw(w)
+		return
+	}
+
+	if arg == "ready" {
+		h.handleCoffeeReady(member, w)
 		return
 	}
 
@@ -52,14 +58,20 @@ func (h CoffeeHandler) handleCoffeeDraw(w http.ResponseWriter) {
 		writeResponse(w, "No one is around to make coffee ☹️")
 	}
 
-	err = h.statsService.Increment(chosenMember)
+	writeResponse(w, fmt.Sprintf("You're up <@%v>! ☕", chosenMember))
+}
+
+func (h CoffeeHandler) handleCoffeeReady(member string, w http.ResponseWriter) {
+	log.Println("Handling coffee ready")
+
+	err := h.statsService.Increment(member)
 	if err != nil {
 		log.Printf("error incrementing member stats: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	writeResponse(w, fmt.Sprintf("You're up <@%v>! ☕", chosenMember))
+	writeResponse(w, "@here Coffee's ready! ☕")
 }
 
 func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {

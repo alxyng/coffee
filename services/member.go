@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"math/rand"
 
 	"github.com/nlopes/slack"
@@ -28,13 +27,11 @@ func (s SlackMemberService) GetRandomMember() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Printf("Channel members: %v\n", channelMembers)
 
 	activeMembers, err := s.getActiveMembers(channelMembers)
 	if err != nil {
 		return "", err
 	}
-	log.Printf("Active members: %v\n", activeMembers)
 
 	if len(activeMembers) == 0 {
 		return "", nil

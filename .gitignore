@@ -2,3 +2,4 @@ vendor
 devcoffee
 devcoffee.exe
 devcoffee.db
+devcoffee.db.lock
