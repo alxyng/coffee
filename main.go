@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -12,10 +13,24 @@ import (
 	"github.com/nullseed/devcoffee/services"
 )
 
+const (
+	dataDirectory = "data"
+	databaseName  = "devcoffee.db"
+)
+
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	db, err := bolt.Open("devcoffee.db", 0600, nil)
+	_, err := os.Stat(dataDirectory)
+	if os.IsNotExist(err) {
+		log.Println("Creating data directory")
+		err = os.Mkdir(dataDirectory, os.ModePerm)
+		if err != nil {
+			log.Fatalf("error creating data directory: %v", err)
+		}
+	}
+
+	db, err := bolt.Open(filepath.Join(dataDirectory, databaseName), 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,6 +48,8 @@ func main() {
 
 	handler := NewCoffeeHandler(memberService, statsService)
 	http.Handle("/need-coffee-please", handler)
+
+	log.Println("Ready")
 
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }

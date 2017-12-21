@@ -1,14 +1,25 @@
 # devcoffee
 
-Setup, build and run by running the following:
+## Setup
+
+Copy `.env.example` to `.env` and replace `<YOUR_SLACK_TOKEN>` with your slack
+token and `<YOUR_SLACK_CHANNEL>` with the channel to pull members from for the
+coffee draw.
+
+## Build & Run
+
+From the root of the project, run:
 ```
-export SLACK_TOKEN=<YOUR_SLACK_TOKEN>
-export SLACK_CHANNEL=<YOUR_SLACK_CHANNEL>
-docker build -t devcoffee:latest .
-docker run -e SLACK_TOKEN -e SLACK_CHANNEL -p "3000:3000" devcoffee:latest
+docker-compose up --build -d
+```
+
+## Stop
+
+From the root of the project, run:
+```
+docker-compose down
 ```
 
 ## Todo
 
-- Persist devcoffee.db on the host using a docker volume
 - Show member names in stats without mentioning members
