@@ -1,5 +1,8 @@
 # devcoffee
 
+An endpoint for a Slack command that chooses a random member from a Slack
+channel to make coffee.
+
 ## Setup
 
 Copy `.env.example` to `.env` and replace `<YOUR_SLACK_TOKEN>` with your slack
