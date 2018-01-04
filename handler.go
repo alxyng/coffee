@@ -71,7 +71,7 @@ func (h CoffeeHandler) handleCoffeeReady(member string, w http.ResponseWriter) {
 		return
 	}
 
-	writeResponse(w, "@here Coffee's ready! ☕")
+	writeResponse(w, "<@here> Coffee's ready! ☕")
 }
 
 func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
