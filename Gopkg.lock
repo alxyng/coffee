@@ -2,16 +2,51 @@
 
 
 [[projects]]
+  name = "github.com/apex/gateway"
+  packages = ["."]
+  revision = "5ae7b7f3bebf9966d0d73b7537ca7daa83124b38"
+  version = "v0.0.1"
+
+[[projects]]
+  name = "github.com/aws/aws-lambda-go"
+  packages = ["events","lambda","lambda/messages","lambdacontext"]
+  revision = "6e2e37798efbb1dfd8e9c6681702e683a6046517"
+  version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/xml/xmlutil","service/sts"]
+  revision = "c13a879e75646fe750d21bcb05bf2cabea9791c1"
+  version = "v1.12.65"
+
+[[projects]]
   name = "github.com/boltdb/bolt"
   packages = ["."]
   revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
   version = "v1.3.1"
 
 [[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
+  version = "v1.32.0"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "0b12d6b5"
+
+[[projects]]
   name = "github.com/nlopes/slack"
   packages = ["."]
   revision = "c86337c0ef2486a15edd804355d9c73d2f2caed1"
   version = "v0.1.0"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   branch = "master"
@@ -28,6 +63,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ceb71210011ae5f76e11d8bf6c484750751223893547ee52a12fde849b15a22c"
+  inputs-digest = "c4fe1ada64efde465a323d89d338748e39986bf5e40e048914eba0192e27a949"
   solver-name = "gps-cdcl"
   solver-version = 1

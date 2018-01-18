@@ -1,5 +1,7 @@
 .env
 data
-vendor
+deployment.zip
 devcoffee
 devcoffee.exe
+main
+vendor

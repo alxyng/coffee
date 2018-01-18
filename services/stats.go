@@ -1,9 +1,14 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/boltdb/bolt"
 )
 
@@ -93,4 +98,78 @@ func (s DiskStatsService) Increment(member string) error {
 		v = []byte(strconv.FormatInt(n, 10))
 		return b.Put([]byte(member), v)
 	})
+}
+
+type S3StatsOptions struct {
+	Bucket     string
+	Key        string
+	Downloader *s3manager.Downloader
+	Uploader   *s3manager.Uploader
+}
+
+type S3StatsService struct {
+	bucket     *string
+	key        *string
+	downloader *s3manager.Downloader
+	uploader   *s3manager.Uploader
+}
+
+func NewS3StatsService(options S3StatsOptions) *S3StatsService {
+	return &S3StatsService{
+		bucket:     aws.String(options.Bucket),
+		key:        aws.String(options.Key),
+		downloader: options.Downloader,
+		uploader:   options.Uploader,
+	}
+}
+
+func (s S3StatsService) Get() (map[string]int, error) {
+	buffer := &aws.WriteAtBuffer{}
+
+	input := &s3.GetObjectInput{
+		Bucket: s.bucket,
+		Key:    s.key,
+	}
+
+	_, err := s.downloader.Download(buffer, input)
+	if err != nil {
+		return nil, err
+	}
+
+	var table map[string]int
+	err = json.Unmarshal(buffer.Bytes(), &table)
+	if err != nil {
+		return nil, err
+	}
+
+	return table, nil
+}
+
+func (s S3StatsService) Increment(member string) error {
+	table, err := s.Get()
+	if err != nil {
+		return err
+	}
+
+	table[member] += 1
+
+	data, err := json.Marshal(table)
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewBuffer(data)
+
+	input := &s3manager.UploadInput{
+		Bucket: s.bucket,
+		Key:    s.key,
+		Body:   reader,
+	}
+
+	_, err = s.uploader.Upload(input)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

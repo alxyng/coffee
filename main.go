@@ -5,41 +5,31 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/boltdb/bolt"
+	"github.com/apex/gateway"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/nlopes/slack"
 	"github.com/nullseed/devcoffee/services"
 )
 
 const (
-	dataDirectory = "data"
-	databaseName  = "devcoffee.db"
+	bucket = "coffee-storage"
+	key    = "results.json"
 )
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	_, err := os.Stat(dataDirectory)
-	if os.IsNotExist(err) {
-		log.Println("Creating data directory")
-		err = os.Mkdir(dataDirectory, os.ModePerm)
-		if err != nil {
-			log.Fatalf("error creating data directory: %v", err)
-		}
-	}
+	awsSession := session.Must(session.NewSession())
 
-	db, err := bolt.Open(filepath.Join(dataDirectory, databaseName), 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	statsService, err := services.NewDiskStatsService(db)
-	if err != nil {
-		log.Fatal(err)
-	}
+	statsService := services.NewS3StatsService(services.S3StatsOptions{
+		Bucket:     bucket,
+		Key:        key,
+		Downloader: s3manager.NewDownloader(awsSession),
+		Uploader:   s3manager.NewUploader(awsSession),
+	})
 
 	api := slack.New(os.Getenv("SLACK_TOKEN"))
 	channel := os.Getenv("SLACK_CHANNEL")
@@ -47,9 +37,9 @@ func main() {
 	memberService := services.NewSlackMemberService(api, channel)
 
 	handler := NewCoffeeHandler(memberService, statsService)
-	http.Handle("/need-coffee-please", handler)
+	http.Handle("/", handler)
 
 	log.Println("Ready")
 
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	log.Fatal(gateway.ListenAndServe("", nil))
 }

@@ -26,3 +26,12 @@ docker-compose down
 ## Todo
 
 - Show member names in stats without mentioning members
+
+## Lambda
+
+Build for AWS Lambda using:
+
+```
+GOOS=linux go build -o main
+zip deployment.zip main
+```
