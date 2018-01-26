@@ -89,19 +89,49 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 		return
 	}
 
-	var results []string
-	for k, v := range stats {
-		name, err := h.memberService.GetMemberName(k)
-		if err != nil {
-			log.Printf("error getting member name: %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		results = append(results, fmt.Sprintf("%v: %v", name, v))
+	results, err := h.getMemberStatsWithNames(stats)
+	if err != nil {
+		log.Printf("error getting member stats with names: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	writeResponse(w, strings.Join(results, ", "))
+}
+
+type memberStats struct {
+	Name        string
+	CoffeesMade int
+	Error       error
+}
+
+func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, error) {
+	ch := make(chan memberStats)
+	for k, v := range stats {
+		go h.getMemberName(k, v, ch)
+	}
+
+	var results []string
+	for _ = range stats {
+		stats := <-ch
+
+		if stats.Error != nil {
+			return nil, stats.Error
+		}
+
+		results = append(results, fmt.Sprintf("%v: %v", stats.Name, stats.CoffeesMade))
+	}
+
+	return results, nil
+}
+
+func (h CoffeeHandler) getMemberName(member string, coffeesMade int, ch chan<- memberStats) {
+	name, err := h.memberService.GetMemberName(member)
+	ch <- memberStats{
+		Name:        name,
+		CoffeesMade: coffeesMade,
+		Error:       err,
+	}
 }
 
 func handleUnknownArgument(w http.ResponseWriter, arg string) {

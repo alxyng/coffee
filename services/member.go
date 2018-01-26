@@ -66,14 +66,12 @@ func (s SlackMemberService) getChannelMembers() ([]string, error) {
 }
 
 func (s SlackMemberService) getActiveMembers(channelMembers []string) ([]string, error) {
-	var activeMembers []string
-
 	ch := make(chan memberStatus)
-
 	for _, member := range channelMembers {
 		go s.getPresence(member, ch)
 	}
 
+	var activeMembers []string
 	for range channelMembers {
 		status := <-ch
 
