@@ -8,6 +8,7 @@ import (
 
 type MemberService interface {
 	GetRandomMember() (string, error)
+	GetMemberName(member string) (string, error)
 }
 
 type SlackMemberService struct {
@@ -38,6 +39,15 @@ func (s SlackMemberService) GetRandomMember() (string, error) {
 	}
 
 	return activeMembers[rand.Intn(len(activeMembers))], nil
+}
+
+func (s SlackMemberService) GetMemberName(member string) (string, error) {
+	user, err := s.api.GetUserInfo(member)
+	if err != nil {
+		return "", err
+	}
+
+	return user.Name, nil
 }
 
 type memberStatus struct {

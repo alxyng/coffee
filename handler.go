@@ -91,7 +91,14 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 
 	var results []string
 	for k, v := range stats {
-		results = append(results, fmt.Sprintf("<@%v>: %v", k, v))
+		name, err := h.memberService.GetMemberName(k)
+		if err != nil {
+			log.Printf("error getting member name: %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		results = append(results, fmt.Sprintf("%v: %v", name, v))
 	}
 
 	writeResponse(w, strings.Join(results, ", "))

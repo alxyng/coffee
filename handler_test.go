@@ -14,6 +14,10 @@ func (m MemberService) GetRandomMember() (string, error) {
 	return "", nil
 }
 
+func (m MemberService) GetMemberName(member string) (string, error) {
+	return "", nil
+}
+
 type StatsService struct {
 }
 
