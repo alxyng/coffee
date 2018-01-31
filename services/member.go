@@ -47,7 +47,7 @@ func (s SlackMemberService) GetMemberName(member string) (string, error) {
 		return "", err
 	}
 
-	return user.Name, nil
+	return user.RealName, nil
 }
 
 type memberStatus struct {
