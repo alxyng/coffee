@@ -97,6 +97,8 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 		return
 	}
 
+	results[0] += " 🏆"
+
 	writeResponse(w, strings.Join(results, "\n"))
 }
 
