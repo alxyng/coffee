@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/nullseed/devcoffee/services"
@@ -96,7 +97,7 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 		return
 	}
 
-	writeResponse(w, strings.Join(results, ", "))
+	writeResponse(w, strings.Join(results, "\n"))
 }
 
 type memberStats struct {
@@ -105,24 +106,45 @@ type memberStats struct {
 	Error       error
 }
 
+type ByCoffeesMade []memberStats
+
+func (a ByCoffeesMade) Len() int {
+	return len(a)
+}
+
+func (a ByCoffeesMade) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+func (a ByCoffeesMade) Less(i, j int) bool {
+	return a[i].CoffeesMade < a[j].CoffeesMade
+}
+
 func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, error) {
 	ch := make(chan memberStats)
 	for k, v := range stats {
 		go h.getMemberName(k, v, ch)
 	}
 
-	var results []string
+	var results []memberStats
 	for _ = range stats {
-		stats := <-ch
+		s := <-ch
 
-		if stats.Error != nil {
-			return nil, stats.Error
+		if s.Error != nil {
+			return nil, s.Error
 		}
 
-		results = append(results, fmt.Sprintf("%v: %v", stats.Name, stats.CoffeesMade))
+		results = append(results, s)
 	}
 
-	return results, nil
+	sort.Sort(sort.Reverse(ByCoffeesMade(results)))
+
+	var output []string
+	for _, r := range results {
+		output = append(output, fmt.Sprintf("%v: %v", r.Name, r.CoffeesMade))
+	}
+
+	return output, nil
 }
 
 func (h CoffeeHandler) getMemberName(member string, coffeesMade int, ch chan<- memberStats) {
