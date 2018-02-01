@@ -108,17 +108,17 @@ type memberStats struct {
 	Error       error
 }
 
-type ByCoffeesMade []memberStats
+type byCoffeesMade []memberStats
 
-func (a ByCoffeesMade) Len() int {
+func (a byCoffeesMade) Len() int {
 	return len(a)
 }
 
-func (a ByCoffeesMade) Swap(i, j int) {
+func (a byCoffeesMade) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
 
-func (a ByCoffeesMade) Less(i, j int) bool {
+func (a byCoffeesMade) Less(i, j int) bool {
 	return a[i].CoffeesMade < a[j].CoffeesMade
 }
 
@@ -139,7 +139,7 @@ func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, 
 		results = append(results, s)
 	}
 
-	sort.Sort(sort.Reverse(ByCoffeesMade(results)))
+	sort.Sort(sort.Reverse(byCoffeesMade(results)))
 
 	var output []string
 	for _, r := range results {
