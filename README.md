@@ -23,10 +23,6 @@ From the root of the project, run:
 docker-compose down
 ```
 
-## Todo
-
-- Show member names in stats without mentioning members
-
 ## Lambda
 
 Build for AWS Lambda using:

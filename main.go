@@ -39,7 +39,5 @@ func main() {
 	handler := NewCoffeeHandler(memberService, statsService)
 	http.Handle("/", handler)
 
-	log.Println("Ready")
-
 	log.Fatal(gateway.ListenAndServe("", nil))
 }
