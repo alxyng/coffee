@@ -1,7 +1,9 @@
-.env
 data
 deployment.zip
 devcoffee
 devcoffee.exe
+env.json
+goaws
 main
+packaged.yaml
 vendor

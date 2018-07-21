@@ -1,11 +1,27 @@
-version: '2'
-
+version: '3.4'
 services:
-    devcoffee:
-        build: .
-        image: devcoffee:latest
-        ports:
-            - "80:3000"
-        volumes:
-            - "./data:/app/data"
-        env_file: .env
+  goaws:
+    image: pafortin/goaws:1.0.3
+    volumes:
+      - "./goaws:/conf"
+    restart: unless-stopped
+  localstack:
+    image: localstack/localstack:0.8.6
+    ports:
+      - "4569:4569" # DynamoDB
+      - "4572:4572" # S3
+      - "4575:4575" # SNS
+      - "4576:4576" # SQS
+      - "4583:4583" # SSM
+      - "4568:4568" # Kinesis
+      - "3020:8080"
+    environment:
+      - SERVICES=${SERVICES-dynamodb,s3,sns,sqs,ssm,kinesis}
+      - SNS_BACKEND=http://goaws:4100
+      - SQS_BACKEND=http://goaws:4100
+      - DEBUG=${DEBUG- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=eu-west-1
+    depends_on:
+      - goaws
+    restart: unless-stopped
