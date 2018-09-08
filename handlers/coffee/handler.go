@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/nullseed/devcoffee/services"
+	"github.com/nullseed/coffee/services"
 )
 
 type CoffeeHandler struct {

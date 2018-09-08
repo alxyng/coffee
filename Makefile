@@ -1,33 +1,20 @@
-.PHONY: deps clean test build run package deploy
+GOCMD=go
+GOBUILD=GOOS=linux $(GOCMD) build
+GOTEST=$(GOCMD) test
 
-deps:
-	dep ensure
+BINARY_NAME=main
 
-clean:
-	rm -rf main
-
-test:
-	go test -v ./...
-
+all: test build
 build:
-	GOOS=linux GOARCH=amd64 go build -o devcoffee
-
-package:
-	aws cloudformation package \
-		--template-file template.yaml \
-		--s3-bucket devcoffee.myunidays.com \
-		--output-template-file packaged.yaml
-
+	(cd handlers/coffee; $(GOBUILD) -o $(BINARY_NAME) -v)
+test:
+	$(GOTEST) -v ./...
 deploy:
-	aws cloudformation deploy \
-		--template-file ./packaged.yaml \
-		--stack-name coffee \
+	sam package --template-file template.yaml --s3-bucket coffee-storage --output-template-file package.yaml
+	sam deploy \
+		--template-file package.yaml \
+		--stack-name coffee-stack \
 		--capabilities CAPABILITY_IAM \
 		--parameter-overrides \
 			SlackTokenParameter=${SLACK_TOKEN} \
 			SlackChannelParameter=${SLACK_CHANNEL}
-
-run:
-	sam local start-api \
-		--env-vars env.json \
-		--docker-network devcoffee_default

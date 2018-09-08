@@ -1,9 +1,4 @@
-data
-deployment.zip
-devcoffee
-devcoffee.exe
-env.json
-goaws
 main
-packaged.yaml
 vendor
+package.yaml
+.DS_Store

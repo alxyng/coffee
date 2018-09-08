@@ -4,43 +4,68 @@ Description: >
   An endpoint for a Slack command that chooses a random member from a Slack
   channel to make coffee
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 5
 
 Parameters:
+
   SlackTokenParameter:
     Type: String
     Default: <YOUR_SLACK_TOKEN>
+
   SlackChannelParameter:
     Type: String
     Default: <YOUR_SLACK_CHANNEL>
 
 Resources:
-  CoffeeFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+
+  CoffeeFunctionRole:
+    Type: AWS::IAM::Role
     Properties:
-      CodeUri: .
-      Handler: devcoffee
-      Runtime: go1.x
-      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - AWSLambdaBasicExecutionRole
-        - AmazonS3FullAccess
+      - PolicyName: CoffeeFunctionRolePolicy1
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - dynamodb:Scan
+            - dynamodb:UpdateItem
+            Resource: arn:aws:dynamodb:*:*:table/members
+            Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+
+  CoffeeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: go1.x
+      CodeUri: handlers/coffee
+      Handler: main
+      Role: !GetAtt CoffeeFunctionRole.Arn
       Events:
         CatchAll:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /
             Method: ANY
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+      Environment:
         Variables:
           SLACK_TOKEN:
             Ref: SlackTokenParameter
           SLACK_CHANNEL:
             Ref: SlackChannelParameter
-  CoffeeTable:
+
+  MembersTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: 'members'
@@ -49,26 +74,9 @@ Resources:
         WriteCapacityUnits: 1
       AttributeDefinitions:
       -
-        AttributeName: 'member_id'
+        AttributeName: 'id'
         AttributeType: 'S'
       KeySchema:
       -
-        AttributeName: 'member_id'
+        AttributeName: 'id'
         KeyType: 'HASH'
-  CoffeeStorage:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: 'coffee-storage.myunidays.com'
-
-Outputs:
-  CoffeeAPI:
-    Description: "API Gateway endpoint URL for Prod environment for First Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-
-  CoffeeFunction:
-    Description: "First Lambda Function ARN"
-    Value: !GetAtt CoffeeFunction.Arn
-
-  CoffeeFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt CoffeeFunctionRole.Arn
