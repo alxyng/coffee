@@ -144,6 +144,9 @@ func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, 
 	var output []string
 	for _, r := range results {
 		output = append(output, fmt.Sprintf("%v: %v", r.Name, r.CoffeesMade))
+		if r.CoffeesMade == 69 {
+			output += " :archer:"
+		}
 	}
 
 	return output, nil
