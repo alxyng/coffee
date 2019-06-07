@@ -49,7 +49,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: go1.x
-      CodeUri: handlers/coffee
+      CodeUri: cmd/coffee
       Handler: main
       Role: !GetAtt CoffeeFunctionRole.Arn
       Events:

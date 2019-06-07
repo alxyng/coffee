@@ -7,13 +7,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/apex/gateway"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/nlopes/slack"
-	"github.com/nullseed/coffee/config"
+	"github.com/nullseed/coffee/internal/config"
+	"github.com/nullseed/coffee/internal/handlers"
 	"github.com/nullseed/coffee/services"
 	"github.com/nullseed/coffee/services/member"
 	"github.com/nullseed/coffee/services/stats"
+
+	"github.com/apex/gateway"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/nlopes/slack"
 )
 
 const (
@@ -31,7 +33,7 @@ func main() {
 func createCoffeeHandler() http.Handler {
 	memberService := createMemberService()
 	statsService := createStatsService()
-	return NewCoffeeHandler(memberService, statsService)
+	return handlers.NewCoffeeHandler(memberService, statsService)
 }
 
 func createStatsService() services.StatsService {

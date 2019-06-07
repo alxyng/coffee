@@ -1,37 +1,25 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/nullseed/coffee/services"
 )
 
-type MemberService struct {
+type MockMemberService struct {
+	services.MemberService
 }
 
-func (m MemberService) GetRandomMember() (string, error) {
-	return "", nil
-}
-
-func (m MemberService) GetMemberName(member string) (string, error) {
-	return "", nil
-}
-
-type StatsService struct {
-}
-
-func (s StatsService) Get() (map[string]int, error) {
-	return nil, nil
-}
-
-func (s StatsService) Increment(member string) error {
-	return nil
+type MockStatsService struct {
+	services.StatsService
 }
 
 func TestServeHTTPWithUnknownArgument(t *testing.T) {
-	m := MemberService{}
-	s := StatsService{}
+	m := MockMemberService{}
+	s := MockStatsService{}
 
 	h := NewCoffeeHandler(m, s)
 
