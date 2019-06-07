@@ -2,3 +2,4 @@ main
 vendor
 package.yaml
 .DS_Store
+.vscode

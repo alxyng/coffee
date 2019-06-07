@@ -148,7 +148,7 @@ func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, 
 			pattern += " :archer:"
 		}
 
-		output = append(output, fmt.Sprintf("%v: %v", r.Name, r.CoffeesMade))
+		output = append(output, fmt.Sprintf(pattern, r.Name, r.CoffeesMade))
 	}
 
 	return output, nil
