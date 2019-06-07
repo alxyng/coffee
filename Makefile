@@ -6,7 +6,7 @@ all: test build
 build:
 	(cd cmd/coffee; $(GOBUILD) -o main -v)
 test:
-	$(GOTEST) -v ./...
+	$(GOTEST) ./...
 deploy:
 	sam package \
 		--profile dev \

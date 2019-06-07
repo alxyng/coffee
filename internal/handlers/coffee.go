@@ -12,15 +12,12 @@ import (
 )
 
 type CoffeeHandler struct {
-	memberService services.MemberService
-	statsService  services.StatsService
+	memserv   services.MemberService
+	statsserv services.StatsService
 }
 
 func NewCoffeeHandler(m services.MemberService, s services.StatsService) CoffeeHandler {
-	return CoffeeHandler{
-		memberService: m,
-		statsService:  s,
-	}
+	return CoffeeHandler{memserv: m, statsserv: s}
 }
 
 func (h CoffeeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +45,7 @@ func (h CoffeeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h CoffeeHandler) handleCoffeeDraw(w http.ResponseWriter) {
 	log.Println("Handling coffee draw")
 
-	chosenMember, err := h.memberService.GetRandomMember()
+	chosenMember, err := h.memserv.GetRandomMember()
 	if err != nil {
 		log.Printf("error getting random member: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -65,7 +62,7 @@ func (h CoffeeHandler) handleCoffeeDraw(w http.ResponseWriter) {
 func (h CoffeeHandler) handleCoffeeReady(member string, w http.ResponseWriter) {
 	log.Println("Handling coffee ready")
 
-	err := h.statsService.Increment(member)
+	err := h.statsserv.Increment(member)
 	if err != nil {
 		log.Printf("error incrementing member stats: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,7 +75,7 @@ func (h CoffeeHandler) handleCoffeeReady(member string, w http.ResponseWriter) {
 func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 	log.Println("Handling coffee stats")
 
-	stats, err := h.statsService.Get()
+	stats, err := h.statsserv.Get()
 	if err != nil {
 		log.Printf("error getting stats: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -97,15 +94,13 @@ func (h CoffeeHandler) handleCoffeeStats(w http.ResponseWriter) {
 		return
 	}
 
-	results[0] += " 🏆"
-
 	writeResponse(w, strings.Join(results, "\n"))
 }
 
 type memberStats struct {
-	Name        string
-	CoffeesMade int
-	Error       error
+	id          string
+	name        string
+	coffeesMade int
 }
 
 type byCoffeesMade []memberStats
@@ -119,48 +114,49 @@ func (a byCoffeesMade) Swap(i, j int) {
 }
 
 func (a byCoffeesMade) Less(i, j int) bool {
-	return a[i].CoffeesMade < a[j].CoffeesMade
+	return a[i].coffeesMade < a[j].coffeesMade
 }
 
 func (h CoffeeHandler) getMemberStatsWithNames(stats map[string]int) ([]string, error) {
-	ch := make(chan memberStats)
-	for k, v := range stats {
-		go h.getMemberName(k, v, ch)
+	members := []string{}
+	for k := range stats {
+		members = append(members, k)
+	}
+
+	names, err := h.memserv.GetMemberNames(members)
+	if err != nil {
+		return nil, err
 	}
 
 	var results []memberStats
-	for range stats {
-		s := <-ch
+	for k, v := range stats {
+		name, _ := names[k]
 
-		if s.Error != nil {
-			return nil, s.Error
-		}
-
-		results = append(results, s)
+		results = append(results, memberStats{
+			id:          k,
+			name:        name,
+			coffeesMade: v,
+		})
 	}
 
 	sort.Sort(sort.Reverse(byCoffeesMade(results)))
 
 	var output []string
-	for _, r := range results {
+	for i, r := range results {
 		pattern := "%v: %v"
-		if r.CoffeesMade == 69 {
+
+		if i == 0 {
+			pattern += " :trophy:"
+		}
+
+		if r.coffeesMade == 69 {
 			pattern += " :archer:"
 		}
 
-		output = append(output, fmt.Sprintf(pattern, r.Name, r.CoffeesMade))
+		output = append(output, fmt.Sprintf(pattern, r.name, r.coffeesMade))
 	}
 
 	return output, nil
-}
-
-func (h CoffeeHandler) getMemberName(member string, coffeesMade int, ch chan<- memberStats) {
-	name, err := h.memberService.GetMemberName(member)
-	ch <- memberStats{
-		Name:        name,
-		CoffeesMade: coffeesMade,
-		Error:       err,
-	}
 }
 
 func handleUnknownArgument(w http.ResponseWriter, arg string) {

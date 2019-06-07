@@ -45,10 +45,38 @@ func (s SlackMemberService) GetMemberName(member string) (string, error) {
 	return user.RealName, nil
 }
 
-type memberStatus struct {
-	Member string
-	Error  error
-	Active bool
+type memberStats struct {
+	id   string
+	name string
+	err  error
+}
+
+func (s SlackMemberService) GetMemberNames(members []string) (map[string]string, error) {
+	ch := make(chan memberStats)
+	for _, member := range members {
+		go (func(m string) {
+			name, err := s.GetMemberName(m)
+			ch <- memberStats{
+				id:   m,
+				name: name,
+				err:  err,
+			}
+		})(member)
+	}
+
+	names := make(map[string]string)
+
+	for range members {
+		s := <-ch
+
+		if s.err != nil {
+			return nil, s.err
+		}
+
+		names[s.id] = s.name
+	}
+
+	return names, nil
 }
 
 func (s SlackMemberService) getChannelMembers() ([]string, error) {
@@ -60,10 +88,23 @@ func (s SlackMemberService) getChannelMembers() ([]string, error) {
 	return group.Members, nil
 }
 
+type memberStatus struct {
+	Member string
+	Error  error
+	Active bool
+}
+
 func (s SlackMemberService) getActiveMembers(channelMembers []string) ([]string, error) {
 	ch := make(chan memberStatus)
 	for _, member := range channelMembers {
-		go s.getPresence(member, ch)
+		go (func(m string) {
+			presence, err := s.api.GetUserPresence(m)
+			ch <- memberStatus{
+				Member: m,
+				Error:  err,
+				Active: err == nil && presence.Presence == "active",
+			}
+		})(member)
 	}
 
 	var activeMembers []string
@@ -80,13 +121,4 @@ func (s SlackMemberService) getActiveMembers(channelMembers []string) ([]string,
 	}
 
 	return activeMembers, nil
-}
-
-func (s SlackMemberService) getPresence(member string, ch chan<- memberStatus) {
-	presence, err := s.api.GetUserPresence(member)
-	ch <- memberStatus{
-		Member: member,
-		Error:  err,
-		Active: err == nil && presence.Presence == "active",
-	}
 }

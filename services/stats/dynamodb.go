@@ -50,17 +50,13 @@ func (s DynamoDBStatsService) Increment(member string) error {
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(member),
-			},
+			"id": {S: aws.String(member)},
 		},
 		ExpressionAttributeNames: map[string]*string{
 			"#S": aws.String("score"),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":incr": {
-				N: aws.String("1"),
-			},
+			":incr": {N: aws.String("1")},
 		},
 		UpdateExpression: aws.String("ADD #S :incr"),
 	}

@@ -20,7 +20,6 @@ import (
 
 const (
 	bucket = "coffee-storage.myunidays.com"
-	key    = "results.json"
 )
 
 func main() {
